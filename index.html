@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Link Vault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --ink:     #0d0d0f;
+  --ink2:    #1a1a1e;
+  --ink3:    #242428;
+  --ink4:    #2e2e34;
+  --wire:    rgba(255,255,255,0.06);
+  --wire2:   rgba(255,255,255,0.10);
+  --wire3:   rgba(255,255,255,0.16);
+  --chalk:   #e8e7ec;
+  --ash:     #9898a6;
+  --fog:     #52525e;
+  --violet:  #8b7cf8;
+  --violet2: #b8aefb;
+  --violet-bg: rgba(139,124,248,0.12);
+  --violet-border: rgba(139,124,248,0.28);
+  --green:   #4ade80;
+  --red:     #f87171;
+  --amber:   #fbbf24;
+  --r-sm:    6px;
+  --r-md:    10px;
+  --r-lg:    14px;
+  --r-xl:    18px;
+  --sans:    'DM Sans', sans-serif;
+  --serif:   'Instrument Serif', serif;
+  --sidebar-w: 228px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--ink);color:var(--chalk);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;}
+
+/* ─── LAYOUT ─────────────────────────────────────────────── */
+.shell{display:flex;height:100vh;overflow:hidden;}
+
+/* ─── SIDEBAR ────────────────────────────────────────────── */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--ink2);
+  border-right:1px solid var(--wire);
+  display:flex;flex-direction:column;
+  overflow-y:auto;overflow-x:hidden;
+}
+
+.sb-logo{
+  display:flex;align-items:center;gap:10px;
+  padding:22px 18px 18px;
+  border-bottom:1px solid var(--wire);
+}
+.sb-logo-mark{
+  width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,#6d5ef0,#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:#fff;flex-shrink:0;
+  box-shadow:0 2px 12px rgba(109,94,240,0.4);
+}
+.sb-logo-text{
+  font-family:var(--serif);font-size:16px;font-style:italic;
+  color:var(--chalk);letter-spacing:-0.2px;
+}
+
+.sb-body{flex:1;padding:14px 10px;}
+
+.sb-group-label{
+  font-size:10px;font-weight:500;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--fog);
+  padding:0 8px;margin:16px 0 6px;
+}
+.sb-group-label:first-child{margin-top:0;}
+
+.sb-item{
+  display:flex;align-items:center;gap:9px;
+  width:100%;padding:7px 8px;border-radius:var(--r-sm);
+  font-size:13px;font-family:var(--sans);font-weight:400;
+  color:var(--ash);cursor:pointer;
+  background:none;border:none;text-align:left;
+  transition:background 0.12s,color 0.12s;
+  position:relative;white-space:nowrap;overflow:hidden;
+}
+.sb-item i{font-size:15px;flex-shrink:0;transition:color 0.12s;}
+.sb-item .sb-name{flex:1;overflow:hidden;text-overflow:ellipsis;}
+.sb-item .sb-pill{
+  font-size:10px;font-weight:500;
+  background:var(--ink3);color:var(--fog);
+  padding:1px 7px;border-radius:99px;flex-shrink:0;
+}
+.sb-item:hover{background:var(--ink3);color:var(--chalk);}
+.sb-item:hover i{color:var(--chalk);}
+.sb-item.on{background:var(--violet-bg);color:var(--violet2);}
+.sb-item.on i{color:var(--violet2);}
+.sb-item.on .sb-pill{background:rgba(139,124,248,0.18);color:var(--violet2);}
+
+.sb-color-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+.sb-footer{padding:12px 10px;border-top:1px solid var(--wire);}
+.sb-footer .sb-item{color:var(--fog);}
+
+/* ─── MAIN ───────────────────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+/* topbar */
+.topbar{
+  height:54px;flex-shrink:0;
+  display:flex;align-items:center;gap:10px;
+  padding:0 22px;
+  background:var(--ink2);
+  border-bottom:1px solid var(--wire);
+}
+
+.search-box{
+  position:relative;flex:1;max-width:380px;
+}
+.search-box i{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  color:var(--fog);font-size:14px;pointer-events:none;
+}
+.search-box input{
+  width:100%;padding:7px 12px 7px 32px;
+  background:var(--ink3);border:1px solid var(--wire2);
+  border-radius:var(--r-md);
+  font-size:13px;font-family:var(--sans);color:var(--chalk);outline:none;
+  transition:border-color 0.15s,background 0.15s;
+}
+.search-box input:focus{border-color:var(--violet);background:var(--ink4);}
+.search-box input::placeholder{color:var(--fog);}
+
+.topbar-end{display:flex;gap:8px;align-items:center;margin-left:auto;}
+
+/* buttons */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:var(--r-md);
+  font-size:13px;font-weight:500;font-family:var(--sans);
+  cursor:pointer;border:1px solid var(--wire2);
+  background:var(--ink3);color:var(--chalk);
+  transition:all 0.13s;white-space:nowrap;
+}
+.btn:hover{background:var(--ink4);border-color:var(--wire3);}
+.btn-violet{background:var(--violet);color:#fff;border-color:transparent;box-shadow:0 1px 12px rgba(139,124,248,0.35);}
+.btn-violet:hover{background:#7a6be0;box-shadow:0 1px 16px rgba(139,124,248,0.5);}
+.btn-sm{padding:5px 11px;font-size:12px;}
+.btn-icon{padding:7px;border-radius:var(--r-sm);}
+
+/* view toggle */
+.vtoggle{display:flex;gap:1px;background:var(--ink3);border:1px solid var(--wire);border-radius:var(--r-sm);padding:3px;}
+.vtoggle button{
+  padding:5px 9px;border-radius:5px;border:none;
+  background:transparent;color:var(--fog);cursor:pointer;font-size:14px;
+  transition:all 0.12s;
+}
+.vtoggle button.on{background:var(--ink4);color:var(--chalk);}
+
+/* ─── CONTENT ────────────────────────────────────────────── */
+.content{flex:1;overflow-y:auto;padding:26px 26px;}
+
+/* page header */
+.ph{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;gap:12px;}
+.ph-left h1{
+  font-family:var(--serif);font-size:24px;font-style:italic;
+  font-weight:400;color:var(--chalk);letter-spacing:-0.4px;line-height:1.2;
+}
+.ph-left .ph-meta{font-size:12px;color:var(--fog);margin-top:3px;}
+
+/* tag strip */
+.tag-strip{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:20px;}
+.tag-pill{
+  font-size:11px;padding:3px 10px;border-radius:99px;
+  border:1px solid var(--wire2);background:var(--ink2);
+  color:var(--ash);cursor:pointer;font-family:var(--sans);
+  transition:all 0.12s;
+}
+.tag-pill:hover{border-color:var(--violet-border);color:var(--violet2);}
+.tag-pill.on{background:var(--violet-bg);border-color:var(--violet-border);color:var(--violet2);}
+.tag-pill-clear{border-color:rgba(248,113,113,0.3);color:var(--red);}
+.tag-pill-clear:hover{background:rgba(248,113,113,0.08);border-color:var(--red);}
+
+/* ─── SECTION BLOCK ──────────────────────────────────────── */
+.sec-block{margin-bottom:30px;}
+.sec-head{display:flex;align-items:center;gap:8px;margin-bottom:11px;}
+.sec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sec-name{
+  font-size:11px;font-weight:500;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--ash);flex:1;
+}
+.sec-count{font-size:11px;color:var(--fog);background:var(--ink3);padding:1px 8px;border-radius:99px;}
+.sec-actions{display:flex;gap:3px;opacity:0;transition:opacity 0.15s;}
+.sec-block:hover .sec-actions{opacity:1;}
+.sec-btn{
+  width:24px;height:24px;border-radius:5px;
+  border:1px solid transparent;background:transparent;
+  color:var(--fog);cursor:pointer;font-size:12px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:all 0.12s;
+}
+.sec-btn:hover{background:var(--ink3);border-color:var(--wire2);color:var(--chalk);}
+.sec-btn.del:hover{color:var(--red);border-color:rgba(248,113,113,0.35);background:rgba(248,113,113,0.07);}
+
+/* grids */
+.grid-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;}
+.list-view{display:flex;flex-direction:column;gap:3px;}
+
+/* ─── LINK CARD ──────────────────────────────────────────── */
+.lc{
+  background:var(--ink2);
+  border:1px solid var(--wire);
+  border-radius:var(--r-lg);
+  padding:13px 14px;
+  display:flex;gap:11px;align-items:flex-start;
+  position:relative;
+  transition:border-color 0.12s,background 0.12s,transform 0.1s;
+  cursor:default;
+}
+.lc:hover{border-color:var(--wire2);background:var(--ink3);}
+.lc.pinned{border-left:2px solid var(--violet);}
+
+/* favicon bubble */
+.lc-fav{
+  width:36px;height:36px;flex-shrink:0;
+  border-radius:10px;
+  background:var(--ink3);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;border:1px solid var(--wire);
+}
+.lc-fav img{width:18px;height:18px;object-fit:contain;}
+.lc-fav .fav-fb{font-size:14px;color:var(--fog);}
+
+/* card body */
+.lc-body{flex:1;min-width:0;cursor:pointer;}
+.lc-title{
+  font-size:13px;font-weight:500;color:var(--chalk);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:2px;
+}
+.lc-url{font-size:11px;color:var(--fog);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px;}
+.lc-tags{display:flex;gap:4px;flex-wrap:wrap;}
+.lc-tag{
+  font-size:10px;padding:1px 7px;border-radius:99px;
+  background:var(--violet-bg);color:var(--violet2);
+  border:1px solid var(--violet-border);
+}
+
+/* card actions */
+.lc-acts{
+  display:flex;gap:2px;
+  position:absolute;top:9px;right:9px;
+  opacity:0;transition:opacity 0.12s;
+}
+.lc:hover .lc-acts{opacity:1;}
+.ca{
+  width:24px;height:24px;border-radius:5px;
+  border:1px solid var(--wire);background:var(--ink);
+  color:var(--fog);cursor:pointer;font-size:12px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:all 0.12s;text-decoration:none;
+}
+.ca:hover{background:var(--ink3);color:var(--chalk);border-color:var(--wire2);}
+.ca.pinned-on{color:var(--violet2);border-color:var(--violet-border);background:var(--violet-bg);}
+.ca.del:hover{color:var(--red);border-color:rgba(248,113,113,0.35);background:rgba(248,113,113,0.07);}
+
+/* list view overrides */
+.list-view .lc{border-radius:var(--r-md);padding:9px 12px;align-items:center;}
+.list-view .lc-fav{width:28px;height:28px;border-radius:7px;}
+.list-view .lc-fav img{width:14px;height:14px;}
+.list-view .lc-body{display:flex;align-items:center;gap:10px;}
+.list-view .lc-title{margin-bottom:0;flex-shrink:0;max-width:200px;}
+.list-view .lc-url{margin-bottom:0;flex:1;}
+.list-view .lc-tags{flex-shrink:0;}
+
+/* ─── EMPTY ──────────────────────────────────────────────── */
+.empty-vault{
+  text-align:center;padding:70px 20px;
+}
+.empty-vault .ev-icon{
+  font-size:42px;color:var(--fog);margin-bottom:14px;
+  display:block;opacity:0.4;
+}
+.empty-vault h2{font-family:var(--serif);font-size:22px;font-style:italic;font-weight:400;color:var(--chalk);margin-bottom:6px;}
+.empty-vault p{font-size:13px;color:var(--ash);}
+
+.empty-sec{
+  padding:18px;text-align:center;
+  border:1px dashed var(--wire2);border-radius:var(--r-md);
+  color:var(--fog);font-size:12px;
+}
+.empty-sec button{
+  color:var(--violet2);background:none;border:none;
+  cursor:pointer;font-family:var(--sans);font-size:12px;
+  text-decoration:underline;text-underline-offset:2px;
+  padding:0;
+}
+
+/* ─── MODALS ─────────────────────────────────────────────── */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(6px);
+  z-index:500;
+  display:none;align-items:center;justify-content:center;
+}
+.overlay.on{display:flex;}
+.modal{
+  background:var(--ink2);
+  border:1px solid var(--wire3);
+  border-radius:var(--r-xl);
+  padding:26px;
+  width:min(480px,95vw);
+  max-height:90vh;overflow-y:auto;
+  box-shadow:0 24px 64px rgba(0,0,0,0.5);
+}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;
+}
+.modal-title{font-family:var(--serif);font-size:20px;font-style:italic;font-weight:400;color:var(--chalk);}
+.modal-close{
+  width:28px;height:28px;border-radius:6px;border:1px solid var(--wire2);
+  background:var(--ink3);color:var(--ash);cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;transition:all 0.12s;
+}
+.modal-close:hover{color:var(--chalk);border-color:var(--wire3);}
+
+.field{margin-bottom:16px;}
+.field label{
+  font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--ash);display:block;margin-bottom:7px;
+}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 13px;
+  background:var(--ink3);border:1px solid var(--wire2);
+  border-radius:var(--r-md);
+  font-size:14px;font-family:var(--sans);color:var(--chalk);
+  outline:none;transition:border-color 0.15s;
+}
+.field input:focus,.field select:focus{border-color:var(--violet);}
+.field input::placeholder{color:var(--fog);}
+.field select option{background:var(--ink3);}
+.field-row{display:flex;gap:12px;}
+.field-row .field{flex:1;}
+.field-hint{font-size:11px;color:var(--fog);margin-top:5px;}
+.field-check{display:flex;align-items:center;gap:9px;}
+.field-check input[type=checkbox]{width:auto;accent-color:var(--violet);width:14px;height:14px;}
+.field-check label{font-size:13px;color:var(--ash);text-transform:none;letter-spacing:0;font-weight:400;margin:0;cursor:pointer;}
+
+/* color picker */
+.cpicker{display:flex;gap:8px;flex-wrap:wrap;}
+.copt{
+  width:26px;height:26px;border-radius:50%;
+  cursor:pointer;border:2px solid transparent;
+  transition:all 0.12s;
+}
+.copt:hover{transform:scale(1.15);}
+.copt.sel{border-color:#fff;outline:2px solid var(--fog);outline-offset:2px;}
+
+.modal-foot{
+  display:flex;gap:8px;justify-content:flex-end;
+  margin-top:22px;padding-top:18px;border-top:1px solid var(--wire);
+}
+
+/* ─── TOAST ──────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:26px;left:50%;
+  transform:translateX(-50%) translateY(8px);
+  background:var(--ink3);border:1px solid var(--wire2);
+  color:var(--chalk);padding:10px 20px;
+  border-radius:99px;font-size:13px;
+  opacity:0;transition:all 0.2s;z-index:999;
+  pointer-events:none;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ─── SCROLLBAR ──────────────────────────────────────────── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--ink4);border-radius:99px;}
+::-webkit-scrollbar-thumb:hover{background:var(--fog);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-mark"><i class="ti ti-bookmarks"></i></div>
+      <span class="sb-logo-text">Link Vault</span>
+    </div>
+
+    <nav class="sb-body" id="sbNav"></nav>
+
+    <div class="sb-footer">
+      <button class="sb-item" onclick="openImport()"><i class="ti ti-upload"></i><span class="sb-name">Import</span></button>
+      <button class="sb-item" onclick="doExport()"><i class="ti ti-download"></i><span class="sb-name">Export</span></button>
+      <button class="sb-item" onclick="openSecModal()"><i class="ti ti-folder-plus"></i><span class="sb-name">New section</span></button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+    <header class="topbar">
+      <div class="search-box">
+        <i class="ti ti-search"></i>
+        <input id="searchInput" type="search" placeholder="Search links, tags… (⌘K)">
+      </div>
+      <div class="topbar-end">
+        <div class="vtoggle">
+          <button class="on" id="gBtn" onclick="setView('grid')" title="Grid"><i class="ti ti-layout-grid"></i></button>
+          <button id="lBtn" onclick="setView('list')" title="List"><i class="ti ti-list"></i></button>
+        </div>
+        <button class="btn btn-violet" onclick="openLinkModal()"><i class="ti ti-plus"></i> Add link</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="ph">
+        <div class="ph-left">
+          <h1 id="pgTitle">All Links</h1>
+          <div class="ph-meta" id="pgMeta"></div>
+        </div>
+      </div>
+      <div class="tag-strip" id="tagStrip"></div>
+      <div id="sectionsArea"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── LINK MODAL ── -->
+<div class="overlay" id="mLink">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="mLinkTitle">Save a link</div>
+      <button class="modal-close" onclick="closeModal('mLink')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="field"><label>URL</label><input id="lUrl" type="url" placeholder="https://…"></div>
+    <div class="field"><label>Title</label><input id="lTitle" placeholder="Leave blank to use domain name"></div>
+    <div class="field-row">
+      <div class="field"><label>Section</label><select id="lSec"></select></div>
+      <div class="field"><label>Tags</label><input id="lTags" placeholder="comma, separated"></div>
+    </div>
+    <div class="field field-check">
+      <input type="checkbox" id="lPin">
+      <label for="lPin">Pin to top of section</label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('mLink')">Cancel</button>
+      <button class="btn btn-violet" onclick="saveLink()">Save link</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION MODAL ── -->
+<div class="overlay" id="mSec">
+  <div class="modal" style="width:min(360px,95vw)">
+    <div class="modal-head">
+      <div class="modal-title" id="mSecTitle">New section</div>
+      <button class="modal-close" onclick="closeModal('mSec')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="field"><label>Name</label><input id="sName" placeholder="e.g. Work, Research, Reading…"></div>
+    <div class="field">
+      <label>Colour</label>
+      <div class="cpicker" id="cPicker"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('mSec')">Cancel</button>
+      <button class="btn btn-violet" onclick="saveSec()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── IMPORT MODAL ── -->
+<div class="overlay" id="mImport">
+  <div class="modal" style="width:min(400px,95vw)">
+    <div class="modal-head">
+      <div class="modal-title">Import links</div>
+      <button class="modal-close" onclick="closeModal('mImport')"><i class="ti ti-x"></i></button>
+    </div>
+    <p style="font-size:13px;color:var(--ash);margin-bottom:18px;line-height:1.7">Choose a JSON vault backup or a browser-exported bookmarks HTML file.</p>
+    <div class="field"><label>File</label><input type="file" id="importFile" accept=".json,.html" style="color:var(--ash)"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('mImport')">Cancel</button>
+      <button class="btn btn-violet" onclick="doImportFile()">Import</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── CONSTANTS ── */
+const SK = 'lv_2025';
+const COLORS = ['#8b7cf8','#4ade80','#f87171','#fbbf24','#60a5fa','#f472b6','#34d399','#fb923c','#a78bfa','#2dd4bf'];
+
+/* ── STATE ── */
+let db = {sections:[],links:[]};
+let activeSection = 'all';
+let filterTag = null;
+let viewMode = 'grid';
+let editLinkId = null;
+let editSecId = null;
+let selColor = COLORS[0];
+
+/* ── PERSISTENCE ── */
+function load(){try{db=JSON.parse(localStorage.getItem(SK)||'{"sections":[],"links":[]}');}catch(e){db={sections:[],links:[]};}}
+function persist(){localStorage.setItem(SK,JSON.stringify(db));}
+
+/* ── UTILS ── */
+function host(u){try{return new URL(u).hostname.replace('www.','');}catch(e){return '';}}
+function fav(u){const h=host(u);return h?'https://www.google.com/s2/favicons?domain='+h+'&sz=64':'';}
+function uid(){return Date.now()+Math.floor(Math.random()*100000).toString(36);}
+function xe(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+let _tt;
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.borderColor=type==='ok'?'rgba(74,222,128,0.3)':type==='err'?'rgba(248,113,113,0.3)':'var(--wire2)';
+  t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),2300);
+}
+function closeModal(id){document.getElementById(id).classList.remove('on');}
+
+/* ── VIEW ── */
+function setView(v){
+  viewMode=v;
+  document.getElementById('gBtn').classList.toggle('on',v==='grid');
+  document.getElementById('lBtn').classList.toggle('on',v==='list');
+  render();
+}
+function goSection(id){activeSection=id;filterTag=null;document.getElementById('searchInput').value='';render();}
+function setTag(t){filterTag=filterTag===t?null:t;render();}
+
+/* ── SIDEBAR ── */
+function renderSidebar(){
+  const pinCnt=db.links.filter(l=>l.pinned).length;
+  let h=`<div class="sb-group-label">Library</div>`;
+  h+=sbi('all','ti-border-all','All Links',db.links.length);
+  h+=sbi('pinned','ti-pin','Pinned',pinCnt);
+  if(db.sections.length){
+    h+=`<div class="sb-group-label" style="margin-top:18px">Sections</div>`;
+    db.sections.forEach(s=>{
+      const cnt=db.links.filter(l=>l.sectionId===s.id).length;
+      h+=`<button class="sb-item${activeSection===s.id?' on':''}" onclick="goSection('${s.id}')">
+        <span class="sb-color-dot" style="background:${s.color}"></span>
+        <span class="sb-name">${xe(s.name)}</span>
+        <span class="sb-pill">${cnt}</span>
+      </button>`;
+    });
+  }
+  document.getElementById('sbNav').innerHTML=h;
+}
+function sbi(id,icon,label,cnt){
+  return `<button class="sb-item${activeSection===id?' on':''}" onclick="goSection('${id}')">
+    <i class="ti ${icon}"></i><span class="sb-name">${label}</span><span class="sb-pill">${cnt}</span>
+  </button>`;
+}
+
+/* ── RENDER ── */
+function render(){
+  renderSidebar();
+  const q=(document.getElementById('searchInput').value||'').toLowerCase();
+
+  // Page title
+  let title='All Links',meta=db.links.length+' link'+(db.links.length!==1?'s':'');
+  if(activeSection==='pinned'){title='Pinned';meta='';}
+  else if(activeSection!=='all'){
+    const s=db.sections.find(x=>x.id===activeSection);
+    if(s){const cnt=db.links.filter(l=>l.sectionId===activeSection).length;title=s.name;meta=cnt+' link'+(cnt!==1?'s':'');}
+  }
+  document.getElementById('pgTitle').textContent=title;
+  document.getElementById('pgMeta').textContent=meta;
+
+  // Tag strip
+  let pool=activeSection==='all'?db.links:activeSection==='pinned'?db.links.filter(l=>l.pinned):db.links.filter(l=>l.sectionId===activeSection);
+  const tags=[...new Set(pool.flatMap(l=>l.tags||[]))].sort();
+  const ts=document.getElementById('tagStrip');
+  ts.innerHTML=tags.length
+    ?tags.map(t=>`<button class="tag-pill${filterTag===t?' on':''}" onclick="setTag('${xe(t)}')">#${xe(t)}</button>`).join('')
+      +(filterTag?`<button class="tag-pill tag-pill-clear" onclick="setTag(null)">✕ clear</button>`:'')
+    :'';
+
+  const area=document.getElementById('sectionsArea');
+
+  if(!db.sections.length&&activeSection==='all'){
+    area.innerHTML=`<div class="empty-vault"><span class="ev-icon"><i class="ti ti-bookmarks"></i></span><h2>Your vault is empty</h2><p>Create a section to start organizing your links</p></div>`;
+    return;
+  }
+
+  if(activeSection==='pinned'){
+    const pins=db.links.filter(l=>l.pinned);
+    if(!pins.length){area.innerHTML=`<div class="empty-vault"><span class="ev-icon"><i class="ti ti-pin"></i></span><h2>Nothing pinned yet</h2><p>Pin a link to surface it here</p></div>`;return;}
+    area.innerHTML=`<div class="sec-block"><div class="sec-head"><div class="sec-name">Pinned</div><div class="sec-count">${pins.length}</div></div><div class="${viewMode==='grid'?'grid-view':'list-view'}">${pins.map(linkCard).join('')}</div></div>`;
+    return;
+  }
+
+  const secs=activeSection==='all'?db.sections:db.sections.filter(s=>s.id===activeSection);
+  area.innerHTML=secs.map(sec=>{
+    let links=db.links.filter(l=>l.sectionId===sec.id);
+    if(q)links=links.filter(l=>l.title.toLowerCase().includes(q)||host(l.url).includes(q)||(l.tags||[]).some(t=>t.includes(q)));
+    if(filterTag)links=links.filter(l=>(l.tags||[]).includes(filterTag));
+    const sorted=[...links.filter(l=>l.pinned).sort((a,b)=>b.ts-a.ts),...links.filter(l=>!l.pinned).sort((a,b)=>b.ts-a.ts)];
+    return `<div class="sec-block">
+      <div class="sec-head">
+        <span class="sec-dot" style="background:${sec.color}"></span>
+        <span class="sec-name">${xe(sec.name)}</span>
+        <span class="sec-count">${sorted.length}</span>
+        <div class="sec-actions">
+          <button class="sec-btn" title="Add link" onclick="openLinkInSec('${sec.id}')"><i class="ti ti-plus"></i></button>
+          <button class="sec-btn" title="Edit section" onclick="openEditSec('${sec.id}')"><i class="ti ti-pencil"></i></button>
+          <button class="sec-btn del" title="Delete section" onclick="deleteSec('${sec.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+      ${sorted.length
+        ?`<div class="${viewMode==='grid'?'grid-view':'list-view'}">${sorted.map(linkCard).join('')}</div>`
+        :`<div class="empty-sec">No links yet — <button onclick="openLinkInSec('${sec.id}')">add one</button></div>`
+      }
+    </div>`;
+  }).join('');
+}
+
+function linkCard(l){
+  const f=fav(l.url);
+  const tags=(l.tags||[]).length?`<div class="lc-tags">${(l.tags||[]).map(t=>`<span class="lc-tag">#${xe(t)}</span>`).join('')}</div>`:'';
+  return `<div class="lc${l.pinned?' pinned':''}">
+    <div class="lc-fav">
+      ${f?`<img src="${xe(f)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="fav-fb" style="display:none"><i class="ti ti-link"></i></span>`:`<span class="fav-fb"><i class="ti ti-link"></i></span>`}
+    </div>
+    <div class="lc-body" onclick="window.open('${xe(l.url)}','_blank')">
+      <div class="lc-title">${xe(l.title)}</div>
+      <div class="lc-url">${xe(host(l.url)||l.url)}</div>
+      ${tags}
+    </div>
+    <div class="lc-acts">
+      <a href="${xe(l.url)}" target="_blank" class="ca" onclick="event.stopPropagation()" title="Open"><i class="ti ti-external-link"></i></a>
+      <button class="ca" onclick="event.stopPropagation();copyLink('${xe(l.url)}')" title="Copy URL"><i class="ti ti-copy"></i></button>
+      <button class="ca${l.pinned?' pinned-on':''}" onclick="event.stopPropagation();togglePin('${l.id}')" title="Pin"><i class="ti ${l.pinned?'ti-pin-filled':'ti-pin'}"></i></button>
+      <button class="ca" onclick="event.stopPropagation();openEditLink('${l.id}')" title="Edit"><i class="ti ti-pencil"></i></button>
+      <button class="ca del" onclick="event.stopPropagation();deleteLink('${l.id}')" title="Delete"><i class="ti ti-trash"></i></button>
+    </div>
+  </div>`;
+}
+
+/* ── LINK ACTIONS ── */
+function openLinkModal(secId){
+  editLinkId=null;
+  document.getElementById('mLinkTitle').textContent='Save a link';
+  document.getElementById('lUrl').value='';
+  document.getElementById('lTitle').value='';
+  document.getElementById('lTags').value='';
+  document.getElementById('lPin').checked=false;
+  buildSecSelect(secId||( activeSection!=='all'&&activeSection!=='pinned'?activeSection:''));
+  document.getElementById('mLink').classList.add('on');
+  setTimeout(()=>document.getElementById('lUrl').focus(),80);
+}
+function openLinkInSec(id){openLinkModal(id);}
+function openEditLink(id){
+  const l=db.links.find(x=>x.id===id);if(!l)return;
+  editLinkId=id;
+  document.getElementById('mLinkTitle').textContent='Edit link';
+  document.getElementById('lUrl').value=l.url;
+  document.getElementById('lTitle').value=l.title;
+  document.getElementById('lTags').value=(l.tags||[]).join(', ');
+  document.getElementById('lPin').checked=!!l.pinned;
+  buildSecSelect(l.sectionId);
+  document.getElementById('mLink').classList.add('on');
+  setTimeout(()=>document.getElementById('lTitle').focus(),80);
+}
+function buildSecSelect(sel){
+  const el=document.getElementById('lSec');
+  if(!db.sections.length){el.innerHTML='<option value="">Create a section first</option>';return;}
+  el.innerHTML=db.sections.map(s=>`<option value="${s.id}"${s.id===sel?' selected':''}>${xe(s.name)}</option>`).join('');
+}
+function saveLink(){
+  const url=document.getElementById('lUrl').value.trim();
+  if(!url){toast('Please enter a URL','err');return;}
+  const secId=document.getElementById('lSec').value;
+  if(!secId){toast('Create a section first','err');return;}
+  const title=document.getElementById('lTitle').value.trim()||host(url)||'Link';
+  const tags=document.getElementById('lTags').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
+  const pinned=document.getElementById('lPin').checked;
+  const fullUrl=/^https?:\/\//i.test(url)?url:'https://'+url;
+  if(editLinkId){
+    const l=db.links.find(x=>x.id===editLinkId);
+    if(l)Object.assign(l,{url:fullUrl,title,sectionId:secId,tags,pinned});
+    toast('Link updated','ok');
+  }else{
+    db.links.push({id:uid(),url:fullUrl,title,sectionId:secId,tags,pinned,ts:Date.now()});
+    toast('Link saved','ok');
+  }
+  persist();closeModal('mLink');render();
+}
+function deleteLink(id){
+  if(!confirm('Delete this link?'))return;
+  db.links=db.links.filter(x=>x.id!==id);
+  persist();render();toast('Removed');
+}
+function togglePin(id){
+  const l=db.links.find(x=>x.id===id);
+  if(l){l.pinned=!l.pinned;persist();render();toast(l.pinned?'Pinned':'Unpinned','ok');}
+}
+function copyLink(url){
+  navigator.clipboard.writeText(url)
+    .then(()=>toast('Copied!','ok'))
+    .catch(()=>{const i=document.createElement('input');i.value=url;document.body.appendChild(i);i.select();document.execCommand('copy');document.body.removeChild(i);toast('Copied!','ok');});
+}
+
+/* ── SECTION ACTIONS ── */
+function buildCPicker(cur){
+  selColor=cur||COLORS[0];
+  document.getElementById('cPicker').innerHTML=COLORS.map(c=>`<div class="copt${c===selColor?' sel':''}" style="background:${c}" onclick="pickColor(this,'${c}')"></div>`).join('');
+}
+function pickColor(el,c){
+  selColor=c;
+  document.querySelectorAll('.copt').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function openSecModal(){
+  editSecId=null;
+  document.getElementById('mSecTitle').textContent='New section';
+  document.getElementById('sName').value='';
+  buildCPicker(COLORS[0]);
+  document.getElementById('mSec').classList.add('on');
+  setTimeout(()=>document.getElementById('sName').focus(),80);
+}
+function openEditSec(id){
+  const s=db.sections.find(x=>x.id===id);if(!s)return;
+  editSecId=id;
+  document.getElementById('mSecTitle').textContent='Edit section';
+  document.getElementById('sName').value=s.name;
+  buildCPicker(s.color);
+  document.getElementById('mSec').classList.add('on');
+  setTimeout(()=>document.getElementById('sName').focus(),80);
+}
+function saveSec(){
+  const name=document.getElementById('sName').value.trim();
+  if(!name){toast('Enter a name','err');return;}
+  if(editSecId){
+    const s=db.sections.find(x=>x.id===editSecId);
+    if(s){s.name=name;s.color=selColor;}
+    toast('Section updated','ok');
+  }else{
+    db.sections.push({id:uid(),name,color:selColor});
+    toast('Section created','ok');
+  }
+  persist();closeModal('mSec');render();
+}
+function deleteSec(id){
+  const s=db.sections.find(x=>x.id===id);if(!s)return;
+  const cnt=db.links.filter(l=>l.sectionId===id).length;
+  if(!confirm(`Delete "${s.name}"${cnt?` and ${cnt} link${cnt>1?'s':''}`:''  }?`))return;
+  db.sections=db.sections.filter(x=>x.id!==id);
+  db.links=db.links.filter(l=>l.sectionId!==id);
+  if(activeSection===id)activeSection='all';
+  persist();render();toast('Section deleted');
+}
+
+/* ── IMPORT / EXPORT ── */
+function doExport(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='linkvault_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  toast('Exported!','ok');
+}
+function openImport(){document.getElementById('mImport').classList.add('on');}
+function doImportFile(){
+  const file=document.getElementById('importFile').files[0];
+  if(!file){toast('Select a file first','err');return;}
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      if(file.name.endsWith('.json')){
+        const imp=JSON.parse(e.target.result);
+        if(imp.sections)db.sections=[...db.sections,...imp.sections.filter(s=>!db.sections.find(x=>x.id===s.id))];
+        if(imp.links)db.links=[...db.links,...imp.links.filter(l=>!db.links.find(x=>x.url===l.url))];
+        toast('Vault imported!','ok');
+      }else{
+        const doc=new DOMParser().parseFromString(e.target.result,'text/html');
+        let sec=db.sections.find(s=>s.name==='Imported');
+        if(!sec){sec={id:uid(),name:'Imported',color:COLORS[4]};db.sections.push(sec);}
+        let n=0;
+        doc.querySelectorAll('a[href]').forEach(a=>{
+          const url=a.href;
+          if(url.startsWith('http')&&!db.links.find(x=>x.url===url)){
+            db.links.push({id:uid(),url,title:a.textContent.trim()||host(url),sectionId:sec.id,tags:[],pinned:false,ts:Date.now()});
+            n++;
+          }
+        });
+        toast(`Imported ${n} bookmark${n!==1?'s':''}!`,'ok');
+      }
+      persist();render();closeModal('mImport');
+    }catch(err){toast('Import failed','err');}
+  };
+  r.readAsText(file);
+}
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')['mLink','mSec','mImport'].forEach(id=>closeModal(id));
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();document.getElementById('searchInput').focus();}
+  if((e.metaKey||e.ctrlKey)&&e.key==='n'){e.preventDefault();openLinkModal();}
+});
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
+document.getElementById('searchInput').addEventListener('input',render);
+
+load();render();
+</script>
+</body>
+</html>
